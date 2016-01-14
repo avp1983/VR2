@@ -25,14 +25,27 @@ public class Handl extends Handler {
         context=a;
         Log.d(LOG_TAG, "handleMessage:START");
 
-        context.pd.setMessage("Инициализация");
+
     }
 
+    private String getFirstGrammar(){
+        ArrayList<String> grammars;
+        String rez = null;
+        grammars= SpitchMobileService.getGrammarList();
+        if (grammars!=null){
+            Log.d(LOG_TAG, "getGrammarList is successfull");
+            if (grammars.size()>=1) rez=  grammars.get(0);
+
+        }
+        Log.d(LOG_TAG, "grammar is "+rez);
+        if (rez==null) context.showAlert("Грамматика не найдена");
+        return rez;
+    }
     final String LOG_TAG = "Handl";
     @Override
     public void handleMessage(Message msg) {
         super.handleMessage(msg);
-        ArrayList<String> grammars;
+
         Log.d(LOG_TAG, "handleMessage:"+msg.what);
         int serviceState = SpitchMobileService.getServiceState();
         Log.d(LOG_TAG, "serviceState="+String.valueOf(serviceState));
@@ -45,27 +58,18 @@ public class Handl extends Handler {
                context.isBlocked=false;
                context.pd.setMessage("ИНИЦИАЛИЗАЦИЯ УСПЕШНА");
                context.pd.dismiss();
-               grammars= SpitchMobileService.getGrammarList();
-               if (grammars!=null){
-                   Log.d(LOG_TAG, "getGrammarList is successfull");
-                   //Log.d(LOG_TAG, "getGrammarList[0] is "+grammars.get(0));
-                   for (int i=0;i<grammars.size();i++){
-                       Log.d(LOG_TAG,grammars.get(i));
-                   }
-               } else {
-                   Log.d(LOG_TAG, "getGrammarList is NOT successfull");
-               }
+               context.gramar=getFirstGrammar();
                break;
            case Constants.INITSERVICE_ERROR_INITIALIZATION:
                context.setTextToAll(context.getString(R.string.INITSERVICE_ERROR_INITIALIZATION));
                context.pd.setMessage(context.getString(R.string.INITSERVICE_ERROR_INITIALIZATION));
-             //  context.initMenuitem.setEnabled(true);
+              context.initMenuitem.setEnabled(true);
                break;
            case Constants.RECOGNITION_WAS_STOPPED:
                String res =  SpitchMobileService.getSpitchResult();
-               new XmlParser(res);
+               //res = XmlParser.parse(res);
                Log.d(LOG_TAG,res);
-               context.txtOut.setText(res);
+               context.CurrentTextView.setText(res);
                break;
 
        }

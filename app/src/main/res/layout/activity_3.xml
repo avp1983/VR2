@@ -47,13 +47,14 @@
             android:layout_gravity="right"
 
             >
-            <TextView
-                android:background="@drawable/box"
-                style="@style/label3"
-                android:text=""
-                android:id="@+id/txtOut2"
 
-                />
+                <TextView
+                    android:background="@drawable/box"
+                    style="@style/label3"
+                    android:text=""
+                    android:id="@+id/txtOut2"
+
+                    />
 
 
 

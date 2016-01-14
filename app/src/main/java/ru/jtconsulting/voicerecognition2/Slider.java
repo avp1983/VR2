@@ -37,8 +37,8 @@ public class Slider implements  View.OnTouchListener{
                 break;
             case MotionEvent.ACTION_UP:
                 float toPosition = event.getX();
-                context.resetButtonsAndTxt();
-                context.disableEnableButtons(!context.isBlocked);
+                context.onSliding();
+
 
                 if (fromPosition > toPosition)
                 {

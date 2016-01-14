@@ -8,7 +8,8 @@ package ru.jtconsulting.voicerecognition2;
         import android.content.DialogInterface;
         import android.os.Bundle;
         import android.os.Handler;
-        import android.os.Message;
+
+        import android.text.method.ScrollingMovementMethod;
         import android.util.Log;
 
         import android.view.Menu;
@@ -34,12 +35,17 @@ public class MainActivity extends Activity  implements View.OnClickListener {
     TextView txtOut2;
     final String LOG_TAG = "myLogs";
     public boolean isBlocked=true;
-    TextView taskOutput;
-
+    public TextView CurrentTextView;
+    public Button CurrentButton;
+    public String gramar=null;
 
     public boolean btnIsPressed=false;
 
     private Handler h;
+    private void makeScroll(TextView t){
+        t.setMovementMethod(new ScrollingMovementMethod());
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         Log.d(LOG_TAG, "onCreate");
@@ -55,15 +61,18 @@ public class MainActivity extends Activity  implements View.OnClickListener {
         btn2 = (Button) findViewById(R.id.button2);
         btn3 = (Button) findViewById(R.id.button3);
         txtOut = (TextView) findViewById(R.id.txtOut);
+        makeScroll(txtOut);
         txtOut1 = (TextView) findViewById(R.id.txtOut1);
+        makeScroll(txtOut1);
         txtOut2 = (TextView) findViewById(R.id.txtOut2);
+        makeScroll(txtOut2);
         // присваиваем обработчик кнопкам
         btn.setOnClickListener(this);
         btn1.setOnClickListener(this);
         btn2.setOnClickListener(this);
         btn3.setOnClickListener(this);
         // SpitchMobileService.initService("111", null, null, null, h, this);
-        showInitializationDialog();
+
         h= new Handl(this);
         initSpService();
 
@@ -72,7 +81,7 @@ public class MainActivity extends Activity  implements View.OnClickListener {
 
 
     public void initSpService(){
-
+            showInitializationDialog();
             disableEnableButtons(false);
 
 
@@ -83,7 +92,7 @@ public class MainActivity extends Activity  implements View.OnClickListener {
 
     }
 
-    private void showAlert(String txt){
+    public void showAlert(String txt){
         AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
         builder.setTitle("Важное сообщение!")
                 .setMessage(txt)
@@ -105,7 +114,7 @@ public class MainActivity extends Activity  implements View.OnClickListener {
     private void showInitializationDialog(){
         pd = new ProgressDialog(this);
         pd.setTitle("Старт.");
-        pd.setMessage("");
+        pd.setMessage("Инициализация");
         // добавляем кнопку
         pd.setButton(Dialog.BUTTON_NEGATIVE, "Отмена", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
@@ -164,20 +173,42 @@ public class MainActivity extends Activity  implements View.OnClickListener {
     }
 
     private void startFreeVoiceRecognition(){
-        Log.d(LOG_TAG, "start FreeVoiceRecognition");
-        Log.d(LOG_TAG, "getStateMes1="+String.valueOf(SpitchMobileService.getStateMes()));
-        if (!SpitchMobileService.startRecognition(null, h  )){
-            Log.d(LOG_TAG, "startFreeVoiceRecognition FAIL");
-            showAlert("Recognition error "+SpitchMobileService.getLastErrorMessage());
-
-        }
+        startVoceRecognition(null);
 
     }
-    private void stopFreeVoiceRecognition(){
+    private void startGrammarVoiceRecognition(){
+        startVoceRecognition(gramar);
+
+    }
+    private  void startVoceRecognition(String grammar){
+        Log.d(LOG_TAG, "start FreeVoiceRecognition");
+        Log.d(LOG_TAG, "getStateMes1="+String.valueOf(SpitchMobileService.getStateMes()));
+        if (SpitchMobileService.getServiceState()==Constants.GETSERVICESTATE_SERVICE_BUSY) {
+            Log.d(LOG_TAG, "startFreeVoiceRecognition FAIL");
+            unpressButton(CurrentButton);
+            showAlert("Сервис занят. Попробуйте через секундочку...");
+
+            return;
+        }
+        if (!SpitchMobileService.startRecognition(grammar, h  )){
+            Log.d(LOG_TAG, "startFreeVoiceRecognition FAIL");
+            showAlert("ОШИБКА: "+SpitchMobileService.getLastErrorMessage());
+
+        }
+    }
+
+
+    private void stopRecognition(){
         Log.d(LOG_TAG, "stop FreeVoiceRecognition");
         // Log.d(LOG_TAG, "getSpitchResult="+String.valueOf(SpitchMobileService.getSpitchResult()));
-        Log.d(LOG_TAG, "stop getServiceState="+String.valueOf(SpitchMobileService.getServiceState()));
-        SpitchMobileService.stopRecognition();
+        int serviceState = SpitchMobileService.getServiceState();
+        Log.d(LOG_TAG, "stop getServiceState="+String.valueOf(serviceState));
+        if (serviceState==Constants.GETSERVICESTATE_SERVICE_BUSY||serviceState==Constants.GETSERVICESTATE_SERVICE_READY_TO_WORK) {
+            SpitchMobileService.stopRecognition();
+        } else {
+            unpressButton(CurrentButton);
+            Log.d(LOG_TAG, "stop FreeVoiceRecognition trying stop NULL object");;
+        }
        // String res =  SpitchMobileService.getSpitchResult();
         //Log.d(LOG_TAG, "getSpitchResult = "+res);
         //showAlert(res);
@@ -195,24 +226,33 @@ public class MainActivity extends Activity  implements View.OnClickListener {
 
     private void switchBtn(View v) {
 
-        Button b = null;
+
 
         int btnId=v.getId();
         switch (btnId){
             case R.id.button: // свободное распознование
-                if (btnIsPressed)  stopFreeVoiceRecognition(); else startFreeVoiceRecognition();
+                if (btnIsPressed)  stopRecognition(); else startFreeVoiceRecognition();
+                CurrentTextView=txtOut;
+                CurrentButton=btn;
                 invertBtn(btnId);
                 break;
 
             case R.id.button1: // распознование по грамматике
+                if (btnIsPressed)  stopRecognition(); else startGrammarVoiceRecognition();
+                CurrentTextView=txtOut1;
+                CurrentButton=btn1;
                 invertBtn(btnId);
                 break;
 
             case R.id.button2: // слепок голоса
+                CurrentTextView=txtOut2;
+                CurrentButton=btn2;
                 invertBtn(btnId);
                 break;
 
             case R.id.button3: // проверка по слепку
+                CurrentTextView=txtOut2;
+                CurrentButton=btn3;
                 invertBtn(btnId);
                 break;
         }
@@ -322,7 +362,7 @@ public class MainActivity extends Activity  implements View.OnClickListener {
     private void  resetButtons(){
         btnIsPressed=false;
         unpressButtons();
-        cancelTask();
+
         disableEnableButtons(true);
     }
     public void disableEnableButtons(boolean enable){
@@ -341,14 +381,22 @@ public class MainActivity extends Activity  implements View.OnClickListener {
 
     public void  resetButtonsAndTxt(){
         btnIsPressed=false;
-        cancelTask();
+
         unpressButtons();
         setTextToAll("");
+        stopRecognition();
         disableEnableButtons(true);
     }
 
-    protected void cancelTask() {
-
+    /**
+     *  Выполняем при перелистывании..
+     */
+    public void onSliding(){
+        resetButtonsAndTxt();
+        disableEnableButtons(!isBlocked);
+        stopRecognition();
     }
+
+
 
 }

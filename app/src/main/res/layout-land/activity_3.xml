@@ -52,6 +52,7 @@
             android:layout_gravity="right"
 
             >
+
             <TextView
                 android:background="@drawable/box"
                 style="@style/label3"
@@ -59,6 +60,7 @@
                 android:id="@+id/txtOut2"
 
                 />
+
 
 
 

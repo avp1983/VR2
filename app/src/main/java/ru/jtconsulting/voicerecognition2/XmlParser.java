@@ -11,14 +11,15 @@ import android.text.TextUtils;
  * Created by www on 14.01.2016.
  */
 public class XmlParser {
-    final String LOG_TAG = "XmlParser";
-    private String tmp = "";
+    final static String LOG_TAG = "XmlParser";
+    private static String tmp = "";
+    private static boolean isFind;
 
-
-    public XmlParser(String xml) {
+    public static String parse(String xml) {
+        String ret="";
         try {
             XmlPullParser xpp = prepareXpp(xml);
-
+            isFind =false;
             while (xpp.getEventType() != XmlPullParser.END_DOCUMENT) {
                 switch (xpp.getEventType()) {
                     // начало документа
@@ -27,6 +28,8 @@ public class XmlParser {
                         break;
                     // начало тэга
                     case XmlPullParser.START_TAG:
+                        if (xpp.getName().compareTo(Constants.XML_TAG_NAME_WITH_RECOGNIZED_TEXT)==0) isFind = true;
+
                         Log.d(LOG_TAG, "START_TAG: name = " + xpp.getName()
                                 + ", depth = " + xpp.getDepth() + ", attrCount = "
                                 + xpp.getAttributeCount());
@@ -45,6 +48,10 @@ public class XmlParser {
                     // содержимое тэга
                     case XmlPullParser.TEXT:
                         Log.d(LOG_TAG, "text = " + xpp.getText());
+                        if (isFind) {
+                            ret =xpp.getText();
+                            break;
+                        }
                         break;
 
                     default:
@@ -60,9 +67,10 @@ public class XmlParser {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        return ret;
     }
 
-    XmlPullParser prepareXpp(String xml) throws XmlPullParserException {
+    static XmlPullParser prepareXpp(String xml) throws XmlPullParserException {
         // получаем фабрику
         XmlPullParserFactory factory = XmlPullParserFactory.newInstance();
         // включаем поддержку namespace (по умолчанию выключена)

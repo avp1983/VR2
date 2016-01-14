@@ -41,4 +41,9 @@ public class Constants {
      */
     public final static  int GETLASTERRORCODE_NO_ERROR = 0;
     public final static  int GETLASTERRORCODE_YES_ERROR = 1;
+
+    /**
+     *  XmlParser. Xml tag name with recognized text
+     */
+    public final static  String XML_TAG_NAME_WITH_RECOGNIZED_TEXT = "input";
 }
