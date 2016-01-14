@@ -69,26 +69,18 @@ public class MainActivity extends Activity  implements View.OnClickListener {
 
     }
 
-    public final static  int SERVICE_NOT_INITED = 0;
-    public final static  int SERVICE_PROCESSING_INITIALIZATION = 1;
-    public final static  int SERVICE_READY_TO_WORK = 2;
-    public final static  int SERVICE_ERROR_INIT = 3;
-    public final static  int SERVICE_BUSY = 4;
+
 
     public void initSpService(){
-        int serviceState=0;
-        //int serviceState = SpitchMobileService.getServiceState();
-        if (serviceState==SERVICE_NOT_INITED||serviceState==SERVICE_ERROR_INIT){
+
             disableEnableButtons(false);
 
 
 
 
             SpitchMobileService.initService("111", null, null, null, h, this);
-        } else {
-            showAlert("Service is busy");
+            Log.d(LOG_TAG, "getStateMes="+String.valueOf(SpitchMobileService.getStateMes()));
 
-        }
     }
 
     private void showAlert(String txt){
@@ -173,19 +165,8 @@ public class MainActivity extends Activity  implements View.OnClickListener {
 
     private void startFreeVoiceRecognition(){
         Log.d(LOG_TAG, "start FreeVoiceRecognition");
-        if (!SpitchMobileService.startRecognition("Mobile SDK grammar", new Handler() {
-            @Override
-            public void handleMessage(Message msg) {
-                super.handleMessage(msg);
-                Log.d(LOG_TAG, "startFreeVoiceRecognition beginning Status="+String.valueOf(msg.what));
-                Log.d(LOG_TAG, "getLastErrorMessage="+SpitchMobileService.getLastErrorMessage());
-                Log.d(LOG_TAG, "getLastErrorCode="+String.valueOf(SpitchMobileService.getLastErrorCode()));
-                Log.d(LOG_TAG, "getServiceAvailability="+String.valueOf(SpitchMobileService.getServiceAvailability()));
-                Log.d(LOG_TAG, "getCurrentType()="+String.valueOf(SpitchMobileService.getCurrentType()));
-
-
-            }
-        })){
+        Log.d(LOG_TAG, "getStateMes1="+String.valueOf(SpitchMobileService.getStateMes()));
+        if (!SpitchMobileService.startRecognition(null, h  )){
             Log.d(LOG_TAG, "startFreeVoiceRecognition FAIL");
             showAlert("Recognition error "+SpitchMobileService.getLastErrorMessage());
 
@@ -197,9 +178,9 @@ public class MainActivity extends Activity  implements View.OnClickListener {
         // Log.d(LOG_TAG, "getSpitchResult="+String.valueOf(SpitchMobileService.getSpitchResult()));
         Log.d(LOG_TAG, "stop getServiceState="+String.valueOf(SpitchMobileService.getServiceState()));
         SpitchMobileService.stopRecognition();
-        //String res =  SpitchMobileService.getSpitchResult();
+       // String res =  SpitchMobileService.getSpitchResult();
         //Log.d(LOG_TAG, "getSpitchResult = "+res);
-        // showAlert(res);
+        //showAlert(res);
     }
     private void invertBtn( int id){
         Button b = (Button) findViewById(id);

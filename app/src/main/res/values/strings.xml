@@ -11,4 +11,6 @@
     <string name="l5">Проверить голос на соответствие слепку:</string>
     <string name="action_exit">Выход</string>
     <string name="action_init">Инициализация</string>
+
+    <string name="INITSERVICE_ERROR_INITIALIZATION">ОШИБКА ИНИЦИАЛИЗАЦИИ</string>
 </resources>

@@ -1,5 +1,6 @@
 package ru.jtconsulting.voicerecognition2;
 
+import android.content.res.Resources;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
@@ -14,10 +15,10 @@ import java.util.ArrayList;
 public class Handl extends Handler {
     private MainActivity context;
 
-    public static final int SDK_NOT_INITED=0;
-    public static final int INITIALIZATION_PROCESSING=1;
-    public static final int INITIALIZATION_COMPLETED=2;
-    public static final int ERROR_INITIALIZATION=3;
+
+
+
+
 
     public Handl(MainActivity a) {
         super();
@@ -33,8 +34,13 @@ public class Handl extends Handler {
         super.handleMessage(msg);
         ArrayList<String> grammars;
         Log.d(LOG_TAG, "handleMessage:"+msg.what);
-       switch(msg.what){
-           case INITIALIZATION_COMPLETED:
+        int serviceState = SpitchMobileService.getServiceState();
+        Log.d(LOG_TAG, "serviceState="+String.valueOf(serviceState));
+
+
+
+        switch(msg.what){
+           case Constants.INITSERVICE_INITIALIZATION_COMPLETED:
                context.disableEnableButtons(true);
                context.isBlocked=false;
                context.pd.setMessage("ИНИЦИАЛИЗАЦИЯ УСПЕШНА");
@@ -50,10 +56,16 @@ public class Handl extends Handler {
                    Log.d(LOG_TAG, "getGrammarList is NOT successfull");
                }
                break;
-           case ERROR_INITIALIZATION:
-               context.setTextToAll("ОШИБКА ИНИЦИАЛИЗАЦИИ");
-               context.pd.setMessage("ОШИБКА ИНИЦИАЛИЗАЦИИ");
+           case Constants.INITSERVICE_ERROR_INITIALIZATION:
+               context.setTextToAll(context.getString(R.string.INITSERVICE_ERROR_INITIALIZATION));
+               context.pd.setMessage(context.getString(R.string.INITSERVICE_ERROR_INITIALIZATION));
              //  context.initMenuitem.setEnabled(true);
+               break;
+           case Constants.RECOGNITION_WAS_STOPPED:
+               String res =  SpitchMobileService.getSpitchResult();
+               new XmlParser(res);
+               Log.d(LOG_TAG,res);
+               context.txtOut.setText(res);
                break;
 
        }
@@ -65,6 +77,6 @@ public class Handl extends Handler {
                 Toast.LENGTH_SHORT);
        // toast.setGravity(Gravity.CENTER, 0, 0);
         toast.show();*/
-        context.pd.setMessage("handleMessage:"+String.valueOf(msg.what));
+       // context.pd.setMessage("handleMessage:"+String.valueOf(msg.what));
     }
 }
