@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <item name="pressed_color" type="color">#FF33B5E5</item>
+    <item name="default_color" type="color">#FFAA66CC</item>
+</resources>

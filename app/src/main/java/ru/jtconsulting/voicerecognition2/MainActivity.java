@@ -19,6 +19,7 @@ package ru.jtconsulting.voicerecognition2;
 
         import android.widget.Button;
         import android.widget.LinearLayout;
+        import android.widget.ListView;
         import android.widget.TextView;
 
         import com.bssys.spitchmobilesdk.*;
@@ -33,6 +34,7 @@ public class MainActivity extends Activity  implements View.OnClickListener {
     TextView txtOut;
     TextView txtOut1;
     TextView txtOut2;
+    public ListView gramarsListView;
     final String LOG_TAG = "myLogs";
     public boolean isBlocked=false;
     public TextView CurrentTextView;
@@ -72,7 +74,8 @@ public class MainActivity extends Activity  implements View.OnClickListener {
         btn1.setOnClickListener(this);
         btn2.setOnClickListener(this);
         btn3.setOnClickListener(this);
-        // SpitchMobileService.initService("111", null, null, null, h, this);
+
+        gramarsListView = (ListView) findViewById(R.id.gramarsListView);
 
 
          handler= new Handl(this);
@@ -188,6 +191,8 @@ public class MainActivity extends Activity  implements View.OnClickListener {
 
     }
     private void startGrammarVoiceRecognition(){
+        Log.d(LOG_TAG,"startGrammarVoiceRecognition grammar="+Globals.grammar);
+        if(Globals.grammar==null) Log.d(LOG_TAG, "startGrammarVoiceRecognition  grammar not selected");
         startVoceRecognition(Globals.grammar);
 
     }
