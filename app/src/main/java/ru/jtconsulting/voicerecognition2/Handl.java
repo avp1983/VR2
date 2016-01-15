@@ -39,7 +39,7 @@ public class Handl extends Handler {
 
         }
         Log.d(LOG_TAG, "grammar is "+rez);
-        if (rez==null) context.showAlert("Грамматика не найдена");
+      //  if (rez==null) context.showAlert("Грамматика не найдена");
         return rez;
     }
     final String LOG_TAG = "Handl";
@@ -59,7 +59,7 @@ public class Handl extends Handler {
                context.isBlocked=false;
                context.pd.setMessage("ИНИЦИАЛИЗАЦИЯ УСПЕШНА");
                context.pd.dismiss();
-               context.gramar=getFirstGrammar();
+               Globals.grammar=getFirstGrammar();
                break;
            case Constants.INITSERVICE_ERROR_INITIALIZATION:
                context.onInitializationError();

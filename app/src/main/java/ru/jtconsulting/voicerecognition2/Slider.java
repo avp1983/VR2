@@ -17,7 +17,7 @@ public class Slider implements  View.OnTouchListener{
     /**
      * Чувствительность
      */
-    private float delta = 20;
+    private float delta = 50;
     private boolean skipTouch(float fromPosition, float toPosition){
         if (Math.abs(fromPosition-toPosition)<delta) {
             return true;

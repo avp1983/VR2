@@ -34,10 +34,10 @@ public class MainActivity extends Activity  implements View.OnClickListener {
     TextView txtOut1;
     TextView txtOut2;
     final String LOG_TAG = "myLogs";
-    public boolean isBlocked=true;
+    public boolean isBlocked=false;
     public TextView CurrentTextView;
     public Button CurrentButton;
-    public String gramar=null;
+
     public boolean errorOnBtnPress=false;
     public boolean stopWithoutResults =false;
     public boolean btnIsPressed=false;
@@ -82,15 +82,23 @@ public class MainActivity extends Activity  implements View.OnClickListener {
 
 
     public void initSpService(){
-            showInitializationDialog();
-            disableEnableButtons(false);
+            int state;
+            try {
+                 state = SpitchMobileService.getServiceState();
+            }
+            catch(Exception e){
+                state=Constants.GETSERVICESTATE_SERVICE_NOT_INITED;
+            }
+            if (state==Constants.GETSERVICESTATE_SERVICE_NOT_INITED||state==Constants.GETSERVICESTATE_SERVICE_ERROR_INIT) {
+                isBlocked=true;
+
+                showInitializationDialog();
+                disableEnableButtons(false);
 
 
-
-
-            SpitchMobileService.initService("111", null, null, null, h, this);
-            Log.d(LOG_TAG, "getStateMes="+String.valueOf(SpitchMobileService.getStateMes()));
-
+                SpitchMobileService.initService("111", null, null, null, h, this);
+                Log.d(LOG_TAG, "getStateMes=" + String.valueOf(SpitchMobileService.getStateMes()));
+            }
     }
 
     public void showAlert(String txt){
@@ -178,7 +186,7 @@ public class MainActivity extends Activity  implements View.OnClickListener {
 
     }
     private void startGrammarVoiceRecognition(){
-        startVoceRecognition(gramar);
+        startVoceRecognition(Globals.grammar);
 
     }
     private  void startVoceRecognition(String grammar){
@@ -205,7 +213,7 @@ public class MainActivity extends Activity  implements View.OnClickListener {
 
     private void stopRecognition(){
         Log.d(LOG_TAG, "stop FreeVoiceRecognition");
-        // Log.d(LOG_TAG, "getSpitchResult="+String.valueOf(SpitchMobileService.getSpitchResult()));
+
         int serviceState = SpitchMobileService.getServiceState();
         Log.d(LOG_TAG, "stop getServiceState="+String.valueOf(serviceState));
         if (!stopWithoutResults) CurrentTextView.setText("Ожидается ответ с сервера...");
@@ -214,6 +222,7 @@ public class MainActivity extends Activity  implements View.OnClickListener {
         } else {
 
             Log.d(LOG_TAG, "stop FreeVoiceRecognition trying stop NULL object");
+            stopWithoutResults=false;
         }
        // String res =  SpitchMobileService.getSpitchResult();
         //Log.d(LOG_TAG, "getSpitchResult = "+res);
