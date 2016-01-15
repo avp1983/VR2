@@ -42,11 +42,11 @@ public class MainActivity extends Activity  implements View.OnClickListener {
     public boolean stopWithoutResults =false;
     public boolean btnIsPressed=false;
 
-    private Handler h;
+
     private void makeScroll(TextView t){
         t.setMovementMethod(new ScrollingMovementMethod());
     }
-
+    private Handler handler=null;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         Log.d(LOG_TAG, "onCreate");
@@ -74,7 +74,9 @@ public class MainActivity extends Activity  implements View.OnClickListener {
         btn3.setOnClickListener(this);
         // SpitchMobileService.initService("111", null, null, null, h, this);
 
-        h= new Handl(this);
+
+         handler= new Handl(this);
+
         initSpService();
 
     }
@@ -96,7 +98,7 @@ public class MainActivity extends Activity  implements View.OnClickListener {
                 disableEnableButtons(false);
 
 
-                SpitchMobileService.initService("111", null, null, null, h, this);
+                SpitchMobileService.initService("111", null, null, null, handler, this);
                 Log.d(LOG_TAG, "getStateMes=" + String.valueOf(SpitchMobileService.getStateMes()));
             }
     }
@@ -201,7 +203,7 @@ public class MainActivity extends Activity  implements View.OnClickListener {
 
             return;
         }
-        if (!SpitchMobileService.startRecognition(grammar, h  )){
+        if (!SpitchMobileService.startRecognition(grammar, handler  )){
             Log.d(LOG_TAG, "startFreeVoiceRecognition FAIL");
             showAlert("ОШИБКА: "+SpitchMobileService.getLastErrorMessage());
 

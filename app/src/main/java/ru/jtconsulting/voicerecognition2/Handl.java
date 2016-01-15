@@ -16,9 +16,13 @@ public class Handl extends Handler {
     private MainActivity context;
 
 
+    public MainActivity getContext() {
+        return context;
+    }
 
-
-
+    public void setContext(MainActivity context) {
+        this.context = context;
+    }
 
     public Handl(MainActivity a) {
         super();
@@ -39,7 +43,7 @@ public class Handl extends Handler {
 
         }
         Log.d(LOG_TAG, "grammar is "+rez);
-      //  if (rez==null) context.showAlert("Грамматика не найдена");
+        //if (rez==null) context.showAlert("Грамматика не найдена");
         return rez;
     }
     final String LOG_TAG = "Handl";
