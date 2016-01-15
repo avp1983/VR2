@@ -28,6 +28,7 @@ public class Handl extends Handler {
 
     }
 
+
     private String getFirstGrammar(){
         ArrayList<String> grammars;
         String rez = null;
@@ -61,26 +62,23 @@ public class Handl extends Handler {
                context.gramar=getFirstGrammar();
                break;
            case Constants.INITSERVICE_ERROR_INITIALIZATION:
-               context.setTextToAll(context.getString(R.string.INITSERVICE_ERROR_INITIALIZATION));
-               context.pd.setMessage(context.getString(R.string.INITSERVICE_ERROR_INITIALIZATION));
-              context.initMenuitem.setEnabled(true);
+               context.onInitializationError();
                break;
            case Constants.RECOGNITION_WAS_STOPPED:
+               if (context.stopWithoutResults) {
+                   context.stopWithoutResults=false;
+                   return;
+               }
                String res =  SpitchMobileService.getSpitchResult();
                //res = XmlParser.parse(res);
                Log.d(LOG_TAG,res);
                context.CurrentTextView.setText(res);
+
                break;
 
        }
 
 
 
-        /*Toast toast = Toast.makeText(context,
-                "Статус: "+ String.valueOf(msg.what),
-                Toast.LENGTH_SHORT);
-       // toast.setGravity(Gravity.CENTER, 0, 0);
-        toast.show();*/
-       // context.pd.setMessage("handleMessage:"+String.valueOf(msg.what));
     }
 }

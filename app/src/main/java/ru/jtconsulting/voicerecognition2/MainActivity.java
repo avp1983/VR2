@@ -38,7 +38,8 @@ public class MainActivity extends Activity  implements View.OnClickListener {
     public TextView CurrentTextView;
     public Button CurrentButton;
     public String gramar=null;
-
+    public boolean errorOnBtnPress=false;
+    public boolean stopWithoutResults =false;
     public boolean btnIsPressed=false;
 
     private Handler h;
@@ -181,12 +182,13 @@ public class MainActivity extends Activity  implements View.OnClickListener {
 
     }
     private  void startVoceRecognition(String grammar){
-        Log.d(LOG_TAG, "start FreeVoiceRecognition");
+        Log.d(LOG_TAG, "start startVoceRecognition");
         Log.d(LOG_TAG, "getStateMes1="+String.valueOf(SpitchMobileService.getStateMes()));
         if (SpitchMobileService.getServiceState()==Constants.GETSERVICESTATE_SERVICE_BUSY) {
             Log.d(LOG_TAG, "startFreeVoiceRecognition FAIL");
 
-            resetButtonsAndTxt();
+            errorOnBtnPress=true;
+            stopRecognition();
             showAlert("Сервис занят. Попробуйте через секундочку...");
 
             return;
@@ -195,6 +197,8 @@ public class MainActivity extends Activity  implements View.OnClickListener {
             Log.d(LOG_TAG, "startFreeVoiceRecognition FAIL");
             showAlert("ОШИБКА: "+SpitchMobileService.getLastErrorMessage());
 
+        } else {
+            CurrentTextView.setText("Чтобы получить результаты распознавания, нажмите ВЫКЛЮЧИТЬ ЗАПИСЬ");
         }
     }
 
@@ -204,10 +208,11 @@ public class MainActivity extends Activity  implements View.OnClickListener {
         // Log.d(LOG_TAG, "getSpitchResult="+String.valueOf(SpitchMobileService.getSpitchResult()));
         int serviceState = SpitchMobileService.getServiceState();
         Log.d(LOG_TAG, "stop getServiceState="+String.valueOf(serviceState));
+        if (!stopWithoutResults) CurrentTextView.setText("Ожидается ответ с сервера...");
         if (serviceState==Constants.GETSERVICESTATE_SERVICE_BUSY) {
             SpitchMobileService.stopRecognition();
         } else {
-            unpressButton(CurrentButton);
+
             Log.d(LOG_TAG, "stop FreeVoiceRecognition trying stop NULL object");
         }
        // String res =  SpitchMobileService.getSpitchResult();
@@ -215,6 +220,11 @@ public class MainActivity extends Activity  implements View.OnClickListener {
         //showAlert(res);
     }
     private void invertBtn( int id){
+        if (errorOnBtnPress){
+            errorOnBtnPress=false;
+            return;
+        }
+
         Button b = (Button) findViewById(id);
         if (btnIsPressed) {
             unpressButton(b);
@@ -232,108 +242,49 @@ public class MainActivity extends Activity  implements View.OnClickListener {
         int btnId=v.getId();
         switch (btnId){
             case R.id.button: // свободное распознование
-                if (btnIsPressed)  stopRecognition(); else startFreeVoiceRecognition();
                 CurrentTextView=txtOut;
                 CurrentButton=btn;
+
+                if (btnIsPressed)  {
+                    stopRecognition();
+                } else {
+
+                    startFreeVoiceRecognition();
+                }
+
                 invertBtn(btnId);
                 break;
 
             case R.id.button1: // распознование по грамматике
-                if (btnIsPressed)  stopRecognition(); else startGrammarVoiceRecognition();
                 CurrentTextView=txtOut1;
                 CurrentButton=btn1;
+
+                if (btnIsPressed) {
+                    stopRecognition();
+                } else {
+
+                    startGrammarVoiceRecognition();
+                }
+
                 invertBtn(btnId);
                 break;
 
             case R.id.button2: // слепок голоса
                 CurrentTextView=txtOut2;
                 CurrentButton=btn2;
+                CurrentTextView.setText("Это еще не готово.");
                 invertBtn(btnId);
                 break;
 
             case R.id.button3: // проверка по слепку
                 CurrentTextView=txtOut2;
                 CurrentButton=btn3;
+                CurrentTextView.setText("Это еще не готово.");
                 invertBtn(btnId);
                 break;
         }
 
-        /*if (v.getId() == R.id.button) {
-            b = btn;
-            taskOutput = txtOut;
 
-            taskNumber=1;
-
-
-        }
-        if (v.getId() == R.id.button1) {
-            b = btn1;
-            taskOutput = txtOut1;
-
-            taskNumber=2;
-        }
-        if (v.getId() == R.id.button2) { // слепок голоса
-            b = btn2;
-            taskOutput = txtOut2;
-            taskNumber=3;
-
-        }
-        if (v.getId() == R.id.button3) { //проверка по слепку
-            b = btn3;
-            taskOutput = txtOut2;
-            taskNumber=4;
-
-        }*/
-      /*  if (btnIsPressed) { // выключаем
-            if (v.getId() == R.id.button) { // свободное распознавание
-                int servRes = SpitchMobileService.getServiceState();
-
-                Log.d(LOG_TAG, "getServiceState="+String.valueOf(servRes));
-                Log.d(LOG_TAG, "button1 OFF");
-                if (servRes==2) SpitchMobileService.stopRecognition();
-
-                String res = SpitchMobileService.getSpitchResult();
-                Log.d(LOG_TAG, "getSpitchResult: "+res);
-                taskOutput.setText(res);
-            }
-
-            unpressButton(b);
-            cancelTask();
-            taskOutput.setText("");
-            taskNumber=0;
-
-            if (v.getId() == R.id.button2) { // слепок голоса
-                btn3.setEnabled(true);
-            }
-            if (v.getId() == R.id.button3) { // слепок голоса
-                btn2.setEnabled(true);
-            }
-        } else { //включаем
-            pressButton(b);
-            //taskOutput.setText(txt);
-            cancelTask();
-            if (v.getId() == R.id.button) { // свободное распознавание
-                Log.d(LOG_TAG, "button1 ON");
-               boolean startRes= SpitchMobileService.startRecognition(null, h);
-               if (!startRes)   {
-                   Log.d(LOG_TAG, "startRecognition FAIL");
-                   Log.d(LOG_TAG, "getServiceState="+String.valueOf(SpitchMobileService.getServiceState()));
-                   Log.d(LOG_TAG, "getLastErrorMessage="+SpitchMobileService.getLastErrorMessage());
-               }
-            }
-            if (v.getId() == R.id.button2) { // слепок голоса
-                btn3.setEnabled(false);
-            }
-            if (v.getId() == R.id.button3) { // слепок голоса
-                btn2.setEnabled(false);
-            }
-
-
-        }
-
-            btnIsPressed = !btnIsPressed;
-
-*/
     }
     @Override
     public void onClick(View v) {
@@ -396,7 +347,15 @@ public class MainActivity extends Activity  implements View.OnClickListener {
     public void onSliding(){
         resetButtonsAndTxt();
         disableEnableButtons(!isBlocked);
+
+        stopWithoutResults=true;
         stopRecognition();
+    }
+
+    public void onInitializationError(){
+        setTextToAll(this.getString(R.string.INITSERVICE_ERROR_INITIALIZATION));
+        pd.setMessage(this.getString(R.string.INITSERVICE_ERROR_INITIALIZATION));
+        initMenuitem.setEnabled(true);
     }
 
 

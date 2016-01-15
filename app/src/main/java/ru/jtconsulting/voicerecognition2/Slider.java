@@ -5,6 +5,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.AnimationUtils;
 import android.widget.ViewFlipper;
+import  java.lang.Math;
 
 /**
  * Created by www on 12.01.2016.
@@ -13,7 +14,17 @@ public class Slider implements  View.OnTouchListener{
     private ViewFlipper flipper = null;
     private float fromPosition;
     private MainActivity context;
-
+    /**
+     * Чувствительность
+     */
+    private float delta = 20;
+    private boolean skipTouch(float fromPosition, float toPosition){
+        if (Math.abs(fromPosition-toPosition)<delta) {
+            return true;
+        } else {
+            return false;
+        }
+    }
     public Slider(MainActivity Context) {
         context = Context;
         flipper = (ViewFlipper)   context.findViewById(R.id.flipper);
@@ -37,6 +48,7 @@ public class Slider implements  View.OnTouchListener{
                 break;
             case MotionEvent.ACTION_UP:
                 float toPosition = event.getX();
+                if (skipTouch(fromPosition,toPosition)) return true;
                 context.onSliding();
 
 
