@@ -185,7 +185,8 @@ public class MainActivity extends Activity  implements View.OnClickListener {
         Log.d(LOG_TAG, "getStateMes1="+String.valueOf(SpitchMobileService.getStateMes()));
         if (SpitchMobileService.getServiceState()==Constants.GETSERVICESTATE_SERVICE_BUSY) {
             Log.d(LOG_TAG, "startFreeVoiceRecognition FAIL");
-            unpressButton(CurrentButton);
+
+            resetButtonsAndTxt();
             showAlert("Сервис занят. Попробуйте через секундочку...");
 
             return;
@@ -203,11 +204,11 @@ public class MainActivity extends Activity  implements View.OnClickListener {
         // Log.d(LOG_TAG, "getSpitchResult="+String.valueOf(SpitchMobileService.getSpitchResult()));
         int serviceState = SpitchMobileService.getServiceState();
         Log.d(LOG_TAG, "stop getServiceState="+String.valueOf(serviceState));
-        if (serviceState==Constants.GETSERVICESTATE_SERVICE_BUSY||serviceState==Constants.GETSERVICESTATE_SERVICE_READY_TO_WORK) {
+        if (serviceState==Constants.GETSERVICESTATE_SERVICE_BUSY) {
             SpitchMobileService.stopRecognition();
         } else {
             unpressButton(CurrentButton);
-            Log.d(LOG_TAG, "stop FreeVoiceRecognition trying stop NULL object");;
+            Log.d(LOG_TAG, "stop FreeVoiceRecognition trying stop NULL object");
         }
        // String res =  SpitchMobileService.getSpitchResult();
         //Log.d(LOG_TAG, "getSpitchResult = "+res);
@@ -344,6 +345,7 @@ public class MainActivity extends Activity  implements View.OnClickListener {
 
     }
     public void unpressButton(Button b){
+        if (b==null) return;
         b.setText(R.string.btnON);
         b.setBackgroundResource(R.drawable.button);
     }
@@ -384,7 +386,7 @@ public class MainActivity extends Activity  implements View.OnClickListener {
 
         unpressButtons();
         setTextToAll("");
-        stopRecognition();
+
         disableEnableButtons(true);
     }
 
