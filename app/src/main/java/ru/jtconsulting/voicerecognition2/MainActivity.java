@@ -17,6 +17,7 @@ package ru.jtconsulting.voicerecognition2;
 
         import android.view.View;
 
+        import android.widget.ArrayAdapter;
         import android.widget.Button;
         import android.widget.LinearLayout;
         import android.widget.ListView;
@@ -76,8 +77,9 @@ public class MainActivity extends Activity  implements View.OnClickListener {
         btn3.setOnClickListener(this);
 
         gramarsListView = (ListView) findViewById(R.id.gramarsListView);
-
-
+        Grammar.initGrammar(this, gramarsListView);
+        Grammar.fillGrammarListView();
+        //Grammar.markSelectedGrammar();
          handler= new Handl(this);
 
         initSpService();
@@ -191,9 +193,9 @@ public class MainActivity extends Activity  implements View.OnClickListener {
 
     }
     private void startGrammarVoiceRecognition(){
-        Log.d(LOG_TAG,"startGrammarVoiceRecognition grammar="+Globals.grammar);
-        if(Globals.grammar==null) Log.d(LOG_TAG, "startGrammarVoiceRecognition  grammar not selected");
-        startVoceRecognition(Globals.grammar);
+        Log.d(LOG_TAG,"startGrammarVoiceRecognition grammar="+Grammar.selectedGrammarName);
+        if(Grammar.selectedGrammarName==null) Log.d(LOG_TAG, "startGrammarVoiceRecognition  grammar not selected");
+        startVoceRecognition(Grammar.selectedGrammarName);
 
     }
     private  void startVoceRecognition(String grammar){

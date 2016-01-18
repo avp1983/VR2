@@ -38,19 +38,6 @@ public class Handl extends Handler {
     }
 
 
-    private ArrayList<String> getGrammarList(){
-        ArrayList<String> grammars;
-        String rez = null;
-        grammars= SpitchMobileService.getGrammarList();
-        if (grammars!=null){
-            Log.d(LOG_TAG, "getGrammarList is successfull");
-            if (grammars.size()>=1) rez=  grammars.get(0);
-
-        }
-        Log.d(LOG_TAG, "grammar is "+rez);
-        //if (rez==null) context.showAlert("Грамматика не найдена");
-        return grammars;
-    }
     final String LOG_TAG = "Handl";
     @Override
     public void handleMessage(Message msg) {
@@ -68,32 +55,10 @@ public class Handl extends Handler {
                context.isBlocked=false;
                context.pd.setMessage("ИНИЦИАЛИЗАЦИЯ УСПЕШНА");
                context.pd.dismiss();
-               Globals.grammarsList=getGrammarList();
-               for(int i=0;i<Globals.grammarsList.size();i++){
-                   Log.d(LOG_TAG, "Gramar= "+Globals.grammarsList.get(i));
-               }
-               ArrayAdapter<String> adapter = new ArrayAdapter<String>(context,
-                       R.layout.my_list_item,
-                       Globals.grammarsList
-               );
-               context.gramarsListView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
-               context.gramarsListView.setAdapter(adapter);
-               context.gramarsListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+               Grammar.getGrammarList();
+               Grammar.fillGrammarListView();
 
-                   @Override
-                   public void onItemClick(AdapterView<?> parent, View view, int position, long arg3) {
 
-                       for (int j = 0; j < parent.getChildCount(); j++)
-                           parent.getChildAt(j).setBackgroundColor(Color.TRANSPARENT);
-
-                       // change the background color of the selected element
-                       view.setBackgroundColor(Color.LTGRAY);
-                       // ListView Clicked item value
-                       String itemValue = (String) context.gramarsListView.getItemAtPosition(position);
-                       Globals.grammar=itemValue;
-                       Log.d(LOG_TAG, "SELECTED:  " + itemValue);
-                   }
-               });
                break;
            case Constants.INITSERVICE_ERROR_INITIALIZATION:
                context.onInitializationError();
