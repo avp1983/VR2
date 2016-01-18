@@ -104,6 +104,7 @@ public class MainActivity extends Activity  implements View.OnClickListener {
 
 
                 SpitchMobileService.initService("111", null, null, null, handler, this);
+
                 Log.d(LOG_TAG, "getStateMes=" + String.valueOf(SpitchMobileService.getStateMes()));
             }
     }
@@ -195,9 +196,11 @@ public class MainActivity extends Activity  implements View.OnClickListener {
     private void startGrammarVoiceRecognition(){
         Log.d(LOG_TAG,"startGrammarVoiceRecognition grammar="+Grammar.selectedGrammarName);
         if(Grammar.selectedGrammarName==null) Log.d(LOG_TAG, "startGrammarVoiceRecognition  grammar not selected");
+
         startVoceRecognition(Grammar.selectedGrammarName);
 
     }
+
     private  void startVoceRecognition(String grammar){
         Log.d(LOG_TAG, "start startVoceRecognition");
         Log.d(LOG_TAG, "getStateMes1="+String.valueOf(SpitchMobileService.getStateMes()));
@@ -212,10 +215,17 @@ public class MainActivity extends Activity  implements View.OnClickListener {
         }
         if (!SpitchMobileService.startRecognition(grammar, handler  )){
             Log.d(LOG_TAG, "startFreeVoiceRecognition FAIL");
-            showAlert("ОШИБКА: "+SpitchMobileService.getLastErrorMessage());
+            //showAlert("ОШИБКА: "+SpitchMobileService.getLastErrorMessage());
+            CurrentTextView.setText("Не удалось начать запись");
+            errorOnBtnPress=true;
 
         } else {
-            CurrentTextView.setText("Чтобы получить результаты распознавания, нажмите ВЫКЛЮЧИТЬ ЗАПИСЬ");
+            String grName;
+            if (grammar==null) grName=" (Свободное распознавание)"; else {
+                grName = " Выбрана грамматика: " + Grammar.selectedGrammarName;
+            }
+
+            CurrentTextView.setText("Чтобы получить результаты распознавания, нажмите ВЫКЛЮЧИТЬ ЗАПИСЬ. "+ grName);
         }
     }
 
@@ -253,8 +263,21 @@ public class MainActivity extends Activity  implements View.OnClickListener {
         btnIsPressed = !btnIsPressed;
     }
 
+    private boolean hasErrors(){
+        boolean rez=false;
+        int errCode = SpitchMobileService.getLastErrorCode();
+        String errMsg =  SpitchMobileService.getLastErrorMessage();
+        if (errCode!=0){
+            rez=true;
+            setTextToAll("Error: " + errMsg + " Error code: " + String.valueOf(errCode));
+        }
+        return rez;
+    }
     private void switchBtn(View v) {
-
+       if (hasErrors()) {
+           resetButtons();
+           return;
+       }
 
 
         int btnId=v.getId();
