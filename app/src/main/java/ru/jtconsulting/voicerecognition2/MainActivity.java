@@ -98,7 +98,7 @@ public class MainActivity extends Activity  implements View.OnClickListener {
             }
             if (state==Constants.GETSERVICESTATE_SERVICE_NOT_INITED||state==Constants.GETSERVICESTATE_SERVICE_ERROR_INIT) {
                 isBlocked=true;
-
+                setTextToAll("");
                 showInitializationDialog();
                 disableEnableButtons(false);
 
@@ -201,31 +201,64 @@ public class MainActivity extends Activity  implements View.OnClickListener {
 
     }
 
-    private  void startVoceRecognition(String grammar){
-        Log.d(LOG_TAG, "start startVoceRecognition");
-        Log.d(LOG_TAG, "getStateMes1="+String.valueOf(SpitchMobileService.getStateMes()));
+    private boolean isServiceReady(){
         if (SpitchMobileService.getServiceState()==Constants.GETSERVICESTATE_SERVICE_BUSY) {
-            Log.d(LOG_TAG, "startFreeVoiceRecognition FAIL");
-
+            Log.d(LOG_TAG, "startVoiceCast FAIL");
             errorOnBtnPress=true;
             stopRecognition();
             showAlert("Сервис занят. Попробуйте через секундочку...");
-
-            return;
+            return false;
         }
-        if (!SpitchMobileService.startRecognition(grammar, handler  )){
-            Log.d(LOG_TAG, "startFreeVoiceRecognition FAIL");
-            //showAlert("ОШИБКА: "+SpitchMobileService.getLastErrorMessage());
-            CurrentTextView.setText("Не удалось начать запись");
-            errorOnBtnPress=true;
+        return true;
+    }
 
-        } else {
-            String grName;
-            if (grammar==null) grName=" (Свободное распознавание)"; else {
-                grName = " Выбрана грамматика: " + Grammar.selectedGrammarName;
+    private void onStartRecognitionErr(String method){
+        Log.d(LOG_TAG, method+" FAIL");
+        CurrentTextView.setText("Не удалось начать запись");
+        errorOnBtnPress = true;
+    }
+
+    /**
+     * Создание слепка голоса
+     */
+    private void startVoiceCast(){
+       if (isServiceReady()) {
+           if (!SpitchMobileService.createVoiceStamp(Constants.AUTH_ID, handler)) {
+               onStartRecognitionErr("startVoiceCast");
+           } else {
+               CurrentTextView.setText("Чтобы получить результаты распознавания, нажмите ВЫКЛЮЧИТЬ ЗАПИСЬ. ");
+           }
+       }
+    }
+
+    /**
+     * Распознавание по слепку голоса
+     */
+    private void startRecognitionByCast(){
+        if (isServiceReady()) {
+            if (!SpitchMobileService.checkVoiceStamp(Constants.AUTH_ID, handler)) {
+                onStartRecognitionErr("startRecognitionByCast");
+            } else {
+                CurrentTextView.setText("Чтобы получить результаты распознавания, нажмите ВЫКЛЮЧИТЬ ЗАПИСЬ. ");
             }
 
-            CurrentTextView.setText("Чтобы получить результаты распознавания, нажмите ВЫКЛЮЧИТЬ ЗАПИСЬ. "+ grName);
+        }
+    }
+
+    private  void startVoceRecognition(String grammar){
+        Log.d(LOG_TAG, "start startVoceRecognition");
+        if (isServiceReady()) {
+            if (!SpitchMobileService.startRecognition(grammar, handler)) {
+                onStartRecognitionErr("startVoceRecognition");
+            } else {
+                String grName;
+                if (grammar == null) grName = " (Свободное распознавание)";
+                else {
+                    grName = " Выбрана грамматика: " + Grammar.selectedGrammarName;
+                }
+
+                CurrentTextView.setText("Чтобы получить результаты распознавания, нажмите ВЫКЛЮЧИТЬ ЗАПИСЬ. " + grName);
+            }
         }
     }
 
@@ -243,9 +276,7 @@ public class MainActivity extends Activity  implements View.OnClickListener {
             Log.d(LOG_TAG, "stop FreeVoiceRecognition trying stop NULL object");
             stopWithoutResults=false;
         }
-       // String res =  SpitchMobileService.getSpitchResult();
-        //Log.d(LOG_TAG, "getSpitchResult = "+res);
-        //showAlert(res);
+
     }
     private void invertBtn( int id){
         if (errorOnBtnPress){
@@ -263,21 +294,8 @@ public class MainActivity extends Activity  implements View.OnClickListener {
         btnIsPressed = !btnIsPressed;
     }
 
-    private boolean hasErrors(){
-        boolean rez=false;
-        int errCode = SpitchMobileService.getLastErrorCode();
-        String errMsg =  SpitchMobileService.getLastErrorMessage();
-        if (errCode!=0){
-            rez=true;
-            setTextToAll("Error: " + errMsg + " Error code: " + String.valueOf(errCode));
-        }
-        return rez;
-    }
+
     private void switchBtn(View v) {
-       if (hasErrors()) {
-           resetButtons();
-           return;
-       }
 
 
         int btnId=v.getId();
@@ -313,14 +331,26 @@ public class MainActivity extends Activity  implements View.OnClickListener {
             case R.id.button2: // слепок голоса
                 CurrentTextView=txtOut2;
                 CurrentButton=btn2;
-                CurrentTextView.setText("Это еще не готово.");
+                if (btnIsPressed) {
+                    stopRecognition();
+                    btn3.setEnabled(true);
+                } else {
+                    btn3.setEnabled(false);
+                    startVoiceCast();
+                }
                 invertBtn(btnId);
                 break;
 
             case R.id.button3: // проверка по слепку
                 CurrentTextView=txtOut2;
                 CurrentButton=btn3;
-                CurrentTextView.setText("Это еще не готово.");
+                if (btnIsPressed) {
+                    stopRecognition();
+                    btn2.setEnabled(true);
+                } else {
+                    btn2.setEnabled(false);
+                    startRecognitionByCast();
+                }
                 invertBtn(btnId);
                 break;
         }

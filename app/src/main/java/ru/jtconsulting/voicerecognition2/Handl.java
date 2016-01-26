@@ -68,14 +68,19 @@ public class Handl extends Handler {
                    context.stopWithoutResults=false;
                    return;
                }
-               String res =  SpitchMobileService.getSpitchResult();
-               if (res.equals("")){
+               if (SpitchMobileService.getLastErrorCode()!=0){
                    context.CurrentTextView.setText("Error message: "+ SpitchMobileService.getLastErrorMessage());
-
                } else {
-                   //res = XmlParser.parse(res);
-                   Log.d(LOG_TAG, res);
-                   context.CurrentTextView.setText(res);
+
+                   String res = SpitchMobileService.getSpitchResult();
+                   if (res.equals("")) {
+                       context.CurrentTextView.setText("Server return empty result. Error message: " + SpitchMobileService.getLastErrorMessage());
+
+                   } else {
+                       //res = XmlParser.parse(res);
+                       Log.d(LOG_TAG, res);
+                       context.CurrentTextView.setText(res);
+                   }
                }
                break;
 

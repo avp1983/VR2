@@ -46,4 +46,10 @@ public class Constants {
      *  XmlParser. Xml tag name with recognized text
      */
     public final static  String XML_TAG_NAME_WITH_RECOGNIZED_TEXT = "input";
+
+
+    /**
+     *  User auth id
+     */
+    public final static String AUTH_ID="1234";
 }
